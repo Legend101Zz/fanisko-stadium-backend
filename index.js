@@ -20,12 +20,33 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+//create new match
+
+app.get("/createMatch", async (req, res) => {
+  const match = new Match({ MatchId: "ef884c07-5b63-4a42-ac72-3947471c43e5" });
+  match
+    .save()
+    .then((result) => {
+      res.status(201).json({
+        type: "success",
+        data: result,
+      });
+    })
+    .catch((err) => {
+      res.status(201).json({
+        type: "error",
+        message: err,
+      });
+    });
+});
+
 //API_ROUTES
+//Get Matches
 app.get("/fanisko", async (req, res) => {
-  await Match.findOne()
+  await Match.find()
     .then((result) => {
       console.log(result);
-      res.render("index", { id: result.MatchId });
+      res.render("index", { id: result[0].MatchId });
     })
     .catch((err) => {
       console.log(err);
@@ -36,13 +57,28 @@ app.get("/fanisko", async (req, res) => {
     });
 });
 
-app.get("/fanisko/api", async (req, res) => {
-  await Match.findOne()
+app.get("/fanisko2", async (req, res) => {
+  await Match.find()
+    .then((result) => {
+      console.log(result);
+      res.render("index2", { id: result[1].MatchId });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(201).json({
+        type: "error",
+        message: err,
+      });
+    });
+});
+//Get Matches api
+app.get("/fanisko/api/match1", async (req, res) => {
+  await Match.find()
     .then((result) => {
       console.log(result);
       res.status(201).json({
         type: "success",
-        id: result.MatchId,
+        id: result[0].MatchId,
       });
     })
     .catch((err) => {
@@ -54,9 +90,33 @@ app.get("/fanisko/api", async (req, res) => {
     });
 });
 
+app.get("/fanisko/api/match2", async (req, res) => {
+  await Match.find()
+    .then((result) => {
+      console.log(result);
+      res.status(201).json({
+        type: "success",
+        id: result[1].MatchId,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(201).json({
+        type: "error",
+        message: err,
+      });
+    });
+});
+//Post new Data of Matches
 app.post("/fanisko", async (req, res) => {
-  console.log(req.body.matchId);
-  await Match.findOneAndUpdate({ MatchId: req.body.matchId })
+  console.log("Req__BODY-->", req.body);
+
+  await Match.findOneAndUpdate(
+    { MatchId: req.body.matchIdOld },
+    {
+      MatchId: req.body.matchId,
+    }
+  )
     .then((result) => {
       console.log(result);
       res.status(201).json({
@@ -73,6 +133,30 @@ app.post("/fanisko", async (req, res) => {
     });
 });
 
+app.post("/fanisko2", async (req, res) => {
+  console.log(req.body.matchId);
+  // const id = req.body.matchIdOld.replace(/['"]+/g, "");
+  await Match.findOneAndUpdate(
+    { MatchId: req.body.matchIdOld },
+    {
+      MatchId: req.body.matchId,
+    }
+  )
+    .then((result) => {
+      console.log(result);
+      res.status(201).json({
+        type: "success",
+        message: "updated Match Id successfully",
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(201).json({
+        type: "error",
+        message: err,
+      });
+    });
+});
 //ROUTE TO HANDLE RANDOM URLS
 
 app.all("*", (req, res, next) => {
